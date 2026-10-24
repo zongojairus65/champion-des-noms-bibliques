@@ -29,7 +29,7 @@ svg{position:absolute;inset:0;pointer-events:none}
 <script>
 let L,key,path=[],found=new Set(),drag=false;
 const $=id=>document.getElementById(id);
-fetch('level.json').then(r=>r.json()).then(l=>{L=l;key='nb-'+l.date;
+fetch('https://zongojairus65.github.io/champion-des-noms-bibliques/level.json?'+Date.now()).then(r=>r.json()).catch(()=>fetch('level.json').then(r=>r.json())).then(l=>{L=l;key='nb-'+l.date;
  try{JSON.parse(localStorage.getItem(key)||'[]').forEach(w=>found.add(w));}catch(e){}
  $('date').textContent='Niveau du '+l.date;grid();wheel();check();});
 function grid(){$('grid').innerHTML=L.words.map(w=>'<div class="row">'+[...w].map(c=>'<div class="cell'+(found.has(w)?' on':'')+'">'+(found.has(w)?c:'')+'</div>').join('')+'</div>').join('');}
