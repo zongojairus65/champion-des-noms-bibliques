@@ -1,6 +1,16 @@
 {
   "name": "champion-des-noms-bibliques",
+  "version": "1.0.0",
   "private": true,
-  "dependencies": { "pg": "^8.11.0", "@capacitor/core": "^6.2.0", "@capacitor/android": "^6.2.0" },
-  "devDependencies": { "@capacitor/cli": "^6.2.0" }
+  "scripts": {
+    "levels": "node scripts/generate-levels.js",
+    "mots": "node scripts/build-mots.js fr.json"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
 }

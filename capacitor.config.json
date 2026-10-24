@@ -1,1 +1,5 @@
-{ "appId": "com.champion.nomsbibliques", "appName": "Champion des noms bibliques", "webDir": "site" }
+{
+  "appId": "com.champion.nomsbibliques",
+  "appName": "Champion des noms bibliques",
+  "webDir": "site"
+}

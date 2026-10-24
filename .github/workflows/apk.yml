@@ -22,4 +22,4 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk champion-des-noms-bibliques.apk
           gh release delete latest -y --cleanup-tag || true
-          gh release create latest champion-des-noms-bibliques.apk --title "APK Champion des noms bibliques" --notes "Dernière version"
+          gh release create latest champion-des-noms-bibliques.apk --title "Champion des noms bibliques (APK)" --notes "Dernière version"
