@@ -78,6 +78,9 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .msg{font-size:20px;font-weight:900;margin:8px 0 14px}
 #toast{position:fixed;left:50%;top:44%;transform:translateX(-50%);padding:9px 18px;border-radius:20px;background:rgba(40,25,10,.9);font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
 #toast.on{opacity:1}
+.praise{position:fixed;left:50%;top:36%;font-size:46px;font-weight:900;white-space:nowrap;color:#ffd23f;-webkit-text-stroke:2px #b3541a;
+ text-shadow:0 5px 0 #7a3a10,0 10px 14px rgba(0,0,0,.5);pointer-events:none;z-index:25;animation:pr 1.2s ease-out forwards}
+@keyframes pr{0%{transform:translate(-50%,-50%) scale(.3) rotate(-8deg);opacity:0}22%{transform:translate(-50%,-50%) scale(1.25) rotate(3deg);opacity:1}65%{transform:translate(-50%,-55%) scale(1) rotate(0);opacity:1}100%{transform:translate(-50%,-110%) scale(1);opacity:0}}
 .shake{animation:sk .3s}@keyframes sk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 </style></head><body>
 <div id="top">
@@ -101,10 +104,29 @@ let LV=[],n=1,L,found=new Set(),H={},coins=300,path=[],drag=false,done=false;
 const $=id=>document.getElementById(id);
 const sget=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
 const sset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let AC=null,mute=false;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,t0,d,type,v){const a=ac();if(!a||mute)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;
+ o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);
+ o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.05);}
+const GAMME=[0,2,4,5,7,9,11,12];
+const sfx={
+ tick(i){tone(440*Math.pow(2,GAMME[Math.min(i,7)]/12),0,.12,'triangle',.16)},
+ ok(len){[523,659,784,1047,1319].slice(0,Math.max(3,Math.min(5,len))).forEach((f,i)=>tone(f,i*.08,.28,'sine',.2));tone(1568,.4,.35,'triangle',.1)},
+ bad(){tone(190,0,.16,'sawtooth',.1);tone(140,.12,.22,'sawtooth',.1)},
+ coin(){tone(988,0,.1,'square',.08);tone(1319,.09,.28,'square',.08)},
+ win(){[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,i*.1,.4,'triangle',.2))}
+};
+const PR=['Cool !','Super !','Bien !','Génial !','Excellent !','Formidable !','Magnifique !','Parfait !','Incroyable !','Fantastique !'];
+let lastPr=-1;
+function praise(len,txt){let lo=len>=6?6:len>=4?3:0,hi=len>=6?10:len>=4?7:4,i;
+ do{i=lo+Math.floor(Math.random()*(hi-lo))}while(i===lastPr&&hi-lo>1);lastPr=i;
+ const e=document.createElement('div');e.className='praise';e.textContent=txt||PR[i];document.body.appendChild(e);setTimeout(()=>e.remove(),1250);}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800);}
 function setCoins(v){coins=v;sset('nb-coins',v);$('coinn').textContent=v;}
 function show(html){$('ov').innerHTML=html;$('ov').style.display='flex';}
 function hide(){$('ov').style.display='none';$('ov').innerHTML='';}
+mute=sget('nb-mute',false);
 fetch('levels.json').then(r=>r.json()).then(a=>{LV=a;coins=sget('nb-coins',300);setCoins(coins);
  n=Math.min(Math.max(1,sget('nb-lvl',1)),LV.length);load();daily();});
 function load(){L={l:[...LV[n-1].l],w:LV[n-1].w};found=new Set(sget('nb-f-'+n,[]));H=sget('nb-h-'+n,{});done=false;
@@ -126,31 +148,32 @@ function draw(x,y){const p=path.map(e=>e.dataset.x+','+e.dataset.y);if(x!=null)p
  document.querySelectorAll('.let').forEach(e=>e.classList.toggle('sel',path.includes(e)));}
 function pos(ev){const r=$('wheel').getBoundingClientRect();return [ev.clientX-r.left,ev.clientY-r.top];}
 function hit(ev){const e=document.elementFromPoint(ev.clientX,ev.clientY);return e&&e.classList.contains('let')?e:null;}
-$('wheel').addEventListener('pointerdown',ev=>{if(done)return;const e=hit(ev);if(!e)return;drag=true;path=[e];const[x,y]=pos(ev);draw(x,y);});
+$('wheel').addEventListener('pointerdown',ev=>{ac();if(done)return;const e=hit(ev);if(!e)return;drag=true;path=[e];sfx.tick(0);const[x,y]=pos(ev);draw(x,y);});
 window.addEventListener('pointermove',ev=>{if(!drag)return;const e=hit(ev);
- if(e){if(path.length>1&&e===path[path.length-2])path.pop();else if(!path.includes(e))path.push(e);}
+ if(e){if(path.length>1&&e===path[path.length-2])path.pop();else if(!path.includes(e)){path.push(e);sfx.tick(path.length-1);}}
  const[x,y]=pos(ev);draw(x,y);});
 window.addEventListener('pointerup',()=>{if(!drag)return;drag=false;const w=path.map(e=>e.textContent).join('');
- if(L.w.includes(w)&&!found.has(w)){found.add(w);sset('nb-f-'+n,[...found]);grid(w);if(navigator.vibrate)navigator.vibrate(25);check();}
- else if(w.length>1){$('wheel').classList.add('shake');setTimeout(()=>$('wheel').classList.remove('shake'),300);}
+ if(L.w.includes(w)&&!found.has(w)){found.add(w);sset('nb-f-'+n,[...found]);grid(w);if(navigator.vibrate)navigator.vibrate(25);sfx.ok(w.length);if(found.size<L.w.length)praise(w.length);check();}
+ else if(w.length>1){sfx.bad();if(found.has(w))toast('Déjà trouvé');$('wheel').classList.add('shake');setTimeout(()=>$('wheel').classList.remove('shake'),300);}
  path=[];draw(null);$('cur').style.visibility='hidden';});
 $('shuf').onclick=()=>{L.l.sort(()=>Math.random()-.5);wheel();};
 $('hint').onclick=()=>{if(done)return;if(coins<60)return toast('Pas assez de pièces');
  const c=L.w.filter(w=>!found.has(w)&&(H[w]||0)<w.length-1);if(!c.length)return toast('Plus d’indice possible');
- const w=c[Math.floor(Math.random()*c.length)];H[w]=(H[w]||0)+1;sset('nb-h-'+n,H);setCoins(coins-60);grid();};
+ const w=c[Math.floor(Math.random()*c.length)];H[w]=(H[w]||0)+1;sset('nb-h-'+n,H);setCoins(coins-60);sfx.coin();grid();};
 $('plus').onclick=()=>toast('Gagne des pièces en réussissant les niveaux');
 function check(silent){if(!L||found.size!==L.w.length||done)return;done=true;
- if(silent)return;setCoins(coins+10);
+ if(silent)return;setCoins(coins+10);sfx.win();praise(9,'Niveau réussi !');
  setTimeout(()=>show('<div class="card"><div class="ribbon">Niveau réussi !</div><div class="paper"><div class="msg">🎉 Bravo !</div><div class="msg" style="font-size:17px">+10 <span class="coin" style="vertical-align:middle">$</span></div><button class="big" id="nx">Suivant</button></div></div>'),500);}
 document.addEventListener('click',e=>{if(e.target.id==='nx'){hide();if(n<LV.length){n++;sset('nb-lvl',n);load();}else toast('🏆 Tu es le champion !');}
+ if(e.target.id==='sn'){mute=!mute;sset('nb-mute',mute);e.target.textContent=mute?'🔇 Son : coupé':'🔊 Son : activé';if(!mute)sfx.coin();}
  if(e.target.id==='cl'||e.target.classList.contains('x')){hide();}
  if(e.target.id==='rs'&&confirm('Tout recommencer ?')){try{localStorage.clear()}catch(x){}location.reload();}});
-$('gear').onclick=()=>show('<div class="card"><div class="ribbon">Réglages</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="msg" style="font-size:16px">Niveau '+n+' / '+LV.length+'</div><button class="big" id="rs" style="background:linear-gradient(#ff8a7a,#d63a2a);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 #8e1d12">Recommencer</button></div></div>');
+$('gear').onclick=()=>show('<div class="card"><div class="ribbon">Réglages</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="msg" style="font-size:16px">Niveau '+n+' / '+LV.length+'</div><button class="big" id="sn" style="font-size:16px;margin-bottom:12px">'+(mute?'🔇 Son : coupé':'🔊 Son : activé')+'</button><br><button class="big" id="rs" style="background:linear-gradient(#ff8a7a,#d63a2a);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 #8e1d12">Recommencer</button></div></div>');
 const RW=[25,35,45,55,65,75,90];
 function daily(){const s=sget('nb-daily',{last:'',day:0}),t=new Date().toISOString().slice(0,10);if(s.last===t)return;
  const y=new Date(Date.now()-864e5).toISOString().slice(0,10),day=s.last===y?(s.day%7)+1:1;
  const cards=RW.map((v,i)=>'<div class="day'+(i+1===day?' now':i+1<day?' past':'')+(i===6?' last':'')+'">'+(i+1===day?'Aujourd’hui':'Jour '+(i+1))+'<i><span class="coin" style="width:22px;height:22px;font-size:12px;vertical-align:middle">$</span> '+v+'</i></div>').join('');
  show('<div class="card"><div class="ribbon">Bonus quotidien</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="msg" style="font-size:15px">N’oublie pas le bonus quotidien !</div><div class="days">'+cards+'</div><button class="big" id="col">Collecter</button></div></div>');
- $('col').onclick=()=>{setCoins(coins+RW[day-1]);sset('nb-daily',{last:t,day});hide();toast('+'+RW[day-1]+' pièces');};}
+ $('col').onclick=()=>{ac();sfx.coin();setCoins(coins+RW[day-1]);sset('nb-daily',{last:t,day});hide();toast('+'+RW[day-1]+' pièces');};}
 window.addEventListener('resize',()=>{if(L)wheel();});
 </script></body></html>
