@@ -1,0 +1,1 @@
+{ "name": "champion-des-noms-bibliques", "private": true, "dependencies": { "pg": "^8.11.0" } }

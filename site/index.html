@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Champion des noms bibliques</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(#e9a94b,#b9772a);font-family:system-ui,sans-serif;color:#fff;text-align:center;touch-action:none;user-select:none;-webkit-user-select:none}
+h1{margin:14px 0 4px;font-size:19px;text-shadow:0 2px 0 #7a4a12}
+#date{opacity:.8;font-size:13px}
+#grid{margin:12px auto;padding:12px;max-width:380px;background:#3a5db0;border:6px solid #dbe8ff;border-radius:18px}
+.row{display:flex;justify-content:center;gap:4px;margin:4px 0}
+.cell{width:34px;height:34px;border-radius:6px;background:#27407d;font-weight:800;font-size:20px;line-height:34px;color:#fff}
+.cell.on{background:#ffe9c4;color:#c2661a;border:2px solid #f0a64b;line-height:30px}
+#wheelwrap{position:relative;width:290px;height:290px;margin:10px auto;background:#2b2118;border:4px dashed #f1d9a8;border-radius:50px}
+svg{position:absolute;inset:0;pointer-events:none}
+.let{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;font-size:34px;font-weight:900;line-height:56px;color:#f7a23a}
+.let.sel{background:#f7a23a;color:#2b2118}
+#cur{height:34px;font-size:26px;font-weight:900;letter-spacing:3px}
+#shuf{font-size:15px;padding:8px 18px;border:0;border-radius:20px;background:#fff;color:#7a4a12;font-weight:700}
+#win{display:none;margin:10px;font-size:22px;font-weight:900;background:#2e8b3d;padding:12px;border-radius:14px}
+.shake{animation:s .3s}@keyframes s{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+</style></head><body>
+<h1>🏆 Champion des noms bibliques</h1><div id="date"></div>
+<div id="grid"></div>
+<div id="cur"></div>
+<div id="wheelwrap"><svg id="svg" width="290" height="290"><polyline id="line" fill="none" stroke="#b44bff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<button id="shuf">🔀 Mélanger</button>
+<div id="win">🎉 Bravo ! Tous les noms trouvés !</div>
+<script>
+let L,key,path=[],found=new Set(),drag=false;
+const $=id=>document.getElementById(id);
+fetch('level.json').then(r=>r.json()).then(l=>{L=l;key='nb-'+l.date;
+ try{JSON.parse(localStorage.getItem(key)||'[]').forEach(w=>found.add(w));}catch(e){}
+ $('date').textContent='Niveau du '+l.date;grid();wheel();check();});
+function grid(){$('grid').innerHTML=L.words.map(w=>'<div class="row">'+[...w].map(c=>'<div class="cell'+(found.has(w)?' on':'')+'">'+(found.has(w)?c:'')+'</div>').join('')+'</div>').join('');}
+function wheel(){const W=$('wheelwrap');W.querySelectorAll('.let').forEach(e=>e.remove());
+ const n=L.letters.length;L.letters.forEach((c,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,e=document.createElement('div');
+ e.className='let';e.textContent=c;e.style.left=(145+100*Math.cos(a))+'px';e.style.top=(145+100*Math.sin(a))+'px';W.appendChild(e);});}
+function ctr(e){return [parseFloat(e.style.left),parseFloat(e.style.top)];}
+function draw(x,y){const p=path.map(e=>ctr(e).join(','));if(x!=null)p.push(x+','+y);$('line').setAttribute('points',p.join(' '));
+ $('cur').textContent=path.map(e=>e.textContent).join('');
+ document.querySelectorAll('.let').forEach(e=>e.classList.toggle('sel',path.includes(e)));}
+function pos(ev){const r=$('wheelwrap').getBoundingClientRect();return [ev.clientX-r.left,ev.clientY-r.top];}
+function hit(ev){const e=document.elementFromPoint(ev.clientX,ev.clientY);return e&&e.classList.contains('let')?e:null;}
+$('wheelwrap').addEventListener('pointerdown',ev=>{const e=hit(ev);if(!e)return;drag=true;path=[e];const[x,y]=pos(ev);draw(x,y);});
+window.addEventListener('pointermove',ev=>{if(!drag)return;const e=hit(ev);
+ if(e){if(path.length>1&&e===path[path.length-2])path.pop();else if(!path.includes(e))path.push(e);}
+ const[x,y]=pos(ev);draw(x,y);});
+window.addEventListener('pointerup',()=>{if(!drag)return;drag=false;const w=path.map(e=>e.textContent).join('');
+ if(L.words.includes(w)&&!found.has(w)){found.add(w);try{localStorage.setItem(key,JSON.stringify([...found]));}catch(e){}grid();check();}
+ else if(w.length>1){$('wheelwrap').classList.add('shake');setTimeout(()=>$('wheelwrap').classList.remove('shake'),300);}
+ path=[];draw(null);});
+$('shuf').onclick=()=>{L.letters.sort(()=>Math.random()-.5);wheel();};
+function check(){if(L&&found.size===L.words.length)$('win').style.display='block';}
+</script></body></html>
