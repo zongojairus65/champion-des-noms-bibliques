@@ -28,8 +28,8 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 #panel{position:relative;background:linear-gradient(#f8efd2,#efe2bd);border-radius:24px;padding:18px 14px 56px;min-height:190px;max-height:36vh;display:flex;align-items:center;justify-content:center;
  box-shadow:0 6px 0 #d8caa6,0 11px 0 rgba(0,0,0,.14),0 18px 22px rgba(0,0,0,.35)}
 #panel:before{content:"";position:absolute;inset:9px;border:3px dashed #d3a276;border-radius:17px;pointer-events:none}
-#grid{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:12px 22px;width:100%}
-.word{display:flex;gap:6px}
+#grid{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:calc(var(--c,40px)*.26) calc(var(--c,40px)*.5);width:100%}
+.word{display:flex;gap:calc(var(--c,40px)*.12)}
 .cell{width:var(--c);height:var(--c);border-radius:11px;background:linear-gradient(#b9a696,#a89484);box-shadow:inset 0 3px 6px rgba(0,0,0,.3),0 2px 0 rgba(255,255,255,.8)}
 .cell.on,.cell.hint{display:grid;place-items:center;font-weight:900;font-size:calc(var(--c)*.64);color:var(--o2);
  background:linear-gradient(#fffdf6,#f3e6c8);border:3px solid #fff;outline:2px solid #9a5a2b;outline-offset:-1px;
@@ -103,6 +103,7 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .done{position:relative;text-align:center}
 .done .ribbon{display:inline-block;font-size:24px;padding:12px 30px;margin-bottom:18px;animation:pop .5s}
 .done .msg{text-shadow:0 3px 0 rgba(0,0,0,.45)}
+@media (max-width:380px){.done .ribbon{font-size:19px;padding:10px 22px}}
 .green{background:linear-gradient(#7fe05f,#2f9d27)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 #1c6b17,0 9px 12px rgba(0,0,0,.35)!important}
 .red{background:linear-gradient(#ff8a7a,#d63a2a)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 #8e1d12!important}
 .stack .big{display:block;width:100%;margin:0 0 12px;font-size:16px;padding:11px 10px}
@@ -122,6 +123,12 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .bar .fill{height:100%;border-radius:8px;background:linear-gradient(#7fe05f,#2f9d27)}
 .bar b{position:absolute;top:-16px;transform:translateX(-50%);font-size:26px}
 .bw{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 4px}
+.inf{flex:0 0 auto;align-self:center;display:grid;place-items:center;width:var(--ib,24px);height:var(--ib,24px);margin-left:2px;padding:0;border:2px solid #fff;border-radius:50%;
+ background:linear-gradient(#59c6ff,#1678d8);color:#fff;font:italic 900 calc(var(--ib,24px)*.62)/1 Georgia,serif;box-shadow:0 3px 0 #0c4a92,0 5px 6px rgba(0,0,0,.3)}
+.inf:active{transform:translateY(2px)}
+.info .nom{font-size:30px;font-weight:900;color:var(--o2);-webkit-text-stroke:1px #ffe0bd;text-shadow:0 3px 0 #b9541a;margin:2px 0 12px}
+.info .lig{background:#e3dfc8;border-radius:8px;padding:8px 10px;margin:8px 4px;text-align:left;font-size:15px;font-weight:700;color:#7a3d12;line-height:1.35}
+.info .lig b{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#1f7d85;margin-bottom:2px}
 .bw .word{gap:2px}.bw .cell{width:24px;height:24px;font-size:15px}
 </style></head><body>
 <div id="top">
@@ -143,7 +150,7 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 </div>
 <div id="ov"></div><div id="toast"></div>
 <script>
-let LV=[],n=1,mode='m',dIdx=0,L,found=new Set(),bset=new Set(),H={},coins=300,path=[],drag=false,done=false,mute=false;
+let LV=[],NI={},n=1,mode='m',dIdx=0,L,found=new Set(),bset=new Set(),H={},coins=300,path=[],drag=false,done=false,mute=false;
 const $=id=>document.getElementById(id);
 const sget=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
 const sset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -176,6 +183,7 @@ function show(html,cls){$('ov').className=cls||'';$('ov').innerHTML=html;$('ov')
 function hide(){$('ov').style.display='none';$('ov').innerHTML='';}
 /* ---------- chargement ---------- */
 mute=sget('nb-mute',false);
+fetch('noms.json').then(r=>r.json()).then(o=>{NI=o;grid();}).catch(()=>{});
 fetch('levels.json').then(r=>r.json()).then(a=>{LV=a;coins=sget('nb-coins',300);setCoins(coins);
  n=Math.min(Math.max(1,sget('nb-lvl',1)),LV.length);dIdx=100+(Math.floor(Date.now()/864e5)*37)%600;load();daily();});
 function load(){const v=cur();L={l:[...v.l],w:v.w,b:v.b||[]};const t=tag();
@@ -185,10 +193,14 @@ function load(){const v=cur();L={l:[...v.l],w:v.w,b:v.b||[]};const t=tag();
  grid();slots();wheel();badge();check(true);
  if(mode==='m'&&n===5&&!sget('nb-ht',0)){sset('nb-ht',1);setTimeout(()=>howto(0),500);}}
 function grid(pop){const t=L.w.reduce((a,w)=>a+w.length,0);
- $('grid').style.setProperty('--c',(t<=12?46:t<=24?38:t<=40?31:27)+'px');
+ setC(t<=12?46:t<=24?38:t<=40?31:27);
  $('grid').innerHTML=L.w.map(w=>'<div class="word">'+[...w].map((c,i)=>{
   const f=found.has(w),h=(H[w]||0)>i;
-  return '<div class="cell'+(f?' on':h?' hint':'')+(pop===w?' pop':'')+'">'+(f||h?c:'')+'</div>';}).join('')+'</div>').join('');}
+  return '<div class="cell'+(f?' on':h?' hint':'')+(pop===w?' pop':'')+'">'+(f||h?c:'')+'</div>';}).join('')+(found.has(w)?'<button class="inf" data-w="'+w+'">i</button>':'')+'</div>').join('');fit();}
+function setC(c){const g=$('grid');g.style.setProperty('--c',c+'px');g.style.setProperty('--ib',Math.max(18,Math.round(c*.62))+'px');}
+function fit(){const g=$('grid');let c=parseInt(g.style.getPropertyValue('--c'))||40;
+ const avail=Math.max(80,innerHeight*.36-74);
+ while(g.offsetHeight>avail&&c>16){c-=2;setC(c);}}
 function slots(){$('slots').innerHTML=[0,1,2].map(i=>'<div class="slot'+(i<bset.size?' on':'')+'">'+(i<bset.size?'⭐':'')+'</div>').join('');}
 const MED=[5,12,20],MR=[20,40,80];
 function badge(){$('bcnt').textContent=sget('nb-bc',0);}
@@ -228,7 +240,7 @@ $('hint').onclick=()=>{if(done)return;if(coins<60)return toast('Pas assez de pi�
  const w=c[Math.floor(Math.random()*c.length)];H[w]=(H[w]||0)+1;sset('nb-h-'+tag(),H);setCoins(coins-60);sfx.coin();grid();};
 $('plus').onclick=()=>toast('Gagne des pièces en réussissant les niveaux');
 $('bonusb').onclick=()=>{const c=sget('nb-bc',0),pc=Math.min(100,c/MED[2]*100);
- const tiles=[...bset].map(w=>'<div class="word">'+[...w].map(x=>'<div class="cell on">'+x+'</div>').join('')+'</div>').join('')||'<p style="text-align:center">Aucun mot bonus trouvé dans ce niveau.</p>';
+ const tiles=[...bset].map(w=>'<div class="word">'+[...w].map(x=>'<div class="cell on">'+x+'</div>').join('')+'<button class="inf" data-w="'+w+'">i</button></div>').join('')||'<p style="text-align:center">Aucun mot bonus trouvé dans ce niveau.</p>';
  show('<div class="card"><div class="ribbon">Mots Bonus</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="bar"><div class="fill" style="width:'+pc+'%"></div><b style="left:25%">🥉</b><b style="left:60%">🥈</b><b style="left:96%">🥇</b></div><div class="msg" style="font-size:15px;margin:4px 0">'+c+' / '+MED[2]+'</div><div class="bw">'+tiles+'</div><p style="text-align:center">Trouve des noms qui ne sont pas dans les réponses pour gagner des pièces !</p></div></div>');};
 $('dailyb').onclick=()=>{if(sget('nb-dcd','')===today())return toast('Défi du jour déjà terminé. Reviens demain !');
  mode='d';hide();load();toast('Défi du jour : +50 pièces à la clé');};
@@ -236,6 +248,11 @@ $('dailyb').onclick=()=>{if(sget('nb-dcd','')===today())return toast('Défi du j
 function check(silent){if(!L||found.size!==L.w.length||done)return;done=true;const t=tag(),first=!sget('nb-w-'+t,false);let gain=0;
  if(first){gain=mode==='d'?50:10;sset('nb-w-'+t,true);setCoins(coins+gain);if(mode==='d')sset('nb-dcd',today());$('ddot').classList.remove('on');if(!silent){sfx.win();praise(9,'Génial !');}}
  setTimeout(()=>show('<div class="burst"></div><div class="done"><div class="ribbon">'+(mode==='d'?'DÉFI RÉUSSI !':'NIVEAU TERMINÉ !')+'</div>'+(gain?'<div class="msg">+'+gain+' <span class="coin" style="vertical-align:middle">$</span></div>':'')+'<button class="big green" id="nx">'+(mode==='d'?'Continuer':'Niveau suivant')+'</button></div>','win'),silent?100:600);}
+/* ---------- fiche d'un nom ---------- */
+function info(w){const d=NI[w]||{n:w.charAt(0)+w.slice(1).toLowerCase()};
+ show('<div class="card info"><div class="ribbon">Infos</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="nom">'+d.n+'</div>'
+ +'<div class="lig"><b>Sens du nom</b>'+(d.s||'Sens non renseigné pour l’instant.')+'</div>'
+ +'<div class="lig"><b>Où le trouver</b>'+(d.r?'Premier passage : '+d.r:'Verset non renseigné.')+'</div></div></div>');}
 /* ---------- tutoriel ---------- */
 const TILES=w=>[...w].map(c=>'<span class="t">'+c+'</span>').join('');
 function howto(p){const pg=p===0
@@ -244,6 +261,7 @@ function howto(p){const pg=p===0
  show('<div class="card"><div class="ribbon">Comment jouer</div><button class="wood x" id="cl">✕</button>'+(p?'<button class="arr l" id="hp">‹</button>':'<button class="arr r" id="hn">›</button>')+'<div class="paper">'+pg+'<div class="dots"><i class="'+(p?'':'on')+'"></i><i class="'+(p?'on':'')+'"></i></div></div></div>');}
 /* ---------- réglages & clics ---------- */
 document.addEventListener('click',e=>{const id=e.target.id;
+ if(e.target.classList.contains('inf')){info(e.target.dataset.w);return;}
  if(id==='nx'){hide();if(mode==='d'){mode='m';load();}else if(n<LV.length){n++;sset('nb-lvl',n);load();}else toast('🏆 Tu es le champion !');}
  if(id==='cl'||e.target.classList.contains('x'))hide();
  if(id==='hn')howto(1);if(id==='hp')howto(0);
@@ -261,5 +279,5 @@ function daily(){const s=sget('nb-daily',{last:'',day:0}),t=today();if(s.last===
  const cards=RW.map((v,i)=>'<div class="day'+(i+1===day?' now':i+1<day?' past':'')+(i===6?' last':'')+'">'+(i+1===day?'Aujourd’hui':'Jour '+(i+1))+'<i><span class="coin" style="width:22px;height:22px;font-size:12px;vertical-align:middle">$</span> '+v+'</i></div>').join('');
  show('<div class="card"><div class="ribbon">Bonus quotidien</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="msg" style="font-size:15px">N’oublie pas le bonus quotidien !</div><div class="days">'+cards+'</div><button class="big" id="col">Collecter</button></div></div>');
  $('col').onclick=()=>{ac();sfx.coin();setCoins(coins+RW[day-1]);sset('nb-daily',{last:t,day});hide();toast('+'+RW[day-1]+' pièces');};}
-window.addEventListener('resize',()=>{if(L)wheel();});
+window.addEventListener('resize',()=>{if(L){grid();wheel();}});
 </script></body></html>
