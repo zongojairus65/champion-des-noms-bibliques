@@ -13,3 +13,8 @@ Mots bonus (kit de couture), défi du jour, bonus quotidien, indices, effets son
 - `deploy.sh` : déploiement complet depuis Termux
 
 Ajouter des noms : éditer `mots.json`, lancer `node scripts/generate-levels.js`, puis `git add . && git commit -m "noms" && git push`.
+
+## Sources des données
+- Texte biblique français utilisé pour extraire les noms et les versets : jeu de données `thiagobodruk/bible` (fr_apee).
+- Sens et nature (personne, lieu, divinité) des noms : STEPBible-Data, Tyndale House Cambridge (TIPNR et TBESH), licence CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), traduits en français ; les sens vérifiés à la main sont dans `data/sens.json` et passent en priorité.
+- Le texte de la Bible n'est pas embarqué dans le jeu : seules les références de versets le sont.

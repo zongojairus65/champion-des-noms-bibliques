@@ -21,7 +21,7 @@ const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const SURCHARGE = { JOB: 'Job 1:1', DAN: 'Genèse 30:6' }; // quand le premier passage désigne autre chose
 const out = {};
 for (const [k, nom] of display) {
-  const re = new RegExp('(^|[^A-Za-zÀ-ÿ])' + esc(nom) + '(?![A-Za-zÀ-ÿ])');
+  const re = new RegExp('(^|[^A-Za-zÀ-ÿ-])' + esc(nom) + '(?![A-Za-zÀ-ÿ-])');
   let ref = null;
   outer: for (const b of bible) for (let c = 0; c < b.chapters.length; c++) for (let v = 0; v < b.chapters[c].length; v++)
     if (re.test(b.chapters[c][v])) { ref = LIVRES[b.abbrev] + ' ' + (c + 1) + ':' + (v + 1); break outer; }

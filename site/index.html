@@ -128,6 +128,8 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .inf:active{transform:translateY(2px)}
 .info .nom{font-size:30px;font-weight:900;color:var(--o2);-webkit-text-stroke:1px #ffe0bd;text-shadow:0 3px 0 #b9541a;margin:2px 0 12px}
 .info .lig{background:#e3dfc8;border-radius:8px;padding:8px 10px;margin:8px 4px;text-align:left;font-size:15px;font-weight:700;color:#7a3d12;line-height:1.35}
+.credit{font-size:11px;font-weight:600;line-height:1.3;color:#7a3d12;opacity:.8;margin-top:2px}
+.info .src{font-weight:600;font-size:12px;opacity:.75}
 .info .lig b{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#1f7d85;margin-bottom:2px}
 .bw .word{gap:2px}.bw .cell{width:24px;height:24px;font-size:15px}
 </style></head><body>
@@ -251,7 +253,8 @@ function check(silent){if(!L||found.size!==L.w.length||done)return;done=true;con
 /* ---------- fiche d'un nom ---------- */
 function info(w){const d=NI[w]||{n:w.charAt(0)+w.slice(1).toLowerCase()};
  show('<div class="card info"><div class="ribbon">Infos</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="nom">'+d.n+'</div>'
- +'<div class="lig"><b>Sens du nom</b>'+(d.s||'Sens non renseigné pour l’instant.')+'</div>'
+ +(d.t?'<div class="lig"><b>Nature</b>'+d.t+'</div>':'')
+ +'<div class="lig"><b>Sens du nom</b>'+(d.s||'Sens non renseigné pour l’instant.')+(d.l?'<span class="src"> (d’après le lexique de Tyndale House)</span>':'')+'</div>'
  +'<div class="lig"><b>Où le trouver</b>'+(d.r?'Premier passage : '+d.r:'Verset non renseigné.')+'</div></div></div>');}
 /* ---------- tutoriel ---------- */
 const TILES=w=>[...w].map(c=>'<span class="t">'+c+'</span>').join('');
@@ -271,7 +274,7 @@ document.addEventListener('click',e=>{const id=e.target.id;
  if(id==='sn'){mute=!mute;sset('nb-mute',mute);e.target.textContent=mute?'🔇 Son : coupé':'🔊 Son : activé';if(!mute)sfx.coin();}});
 $('gear').onclick=()=>show('<div class="card"><div class="ribbon">Réglages</div><button class="wood x" id="cl">✕</button><div class="paper stack"><div class="msg" style="font-size:16px">'+(mode==='d'?'Défi du jour':'Niveau '+n+' / '+LV.length)+'</div>'
  +'<button class="big" id="sn">'+(mute?'🔇 Son : coupé':'🔊 Son : activé')+'</button><button class="big" id="ht">❓ Comment jouer</button>'
- +(mode==='d'?'<button class="big green" id="bk">Retour au niveau '+n+'</button>':'')+'<button class="big red" id="rs">Recommencer</button></div></div>');
+ +(mode==='d'?'<button class="big green" id="bk">Retour au niveau '+n+'</button>':'')+'<button class="big red" id="rs">Recommencer</button><div class="credit">Sens et nature des noms : données STEPBible.org (Tyndale House), licence CC BY 4.0, traduites en français.</div></div></div>');
 /* ---------- bonus quotidien ---------- */
 const RW=[25,35,45,55,65,75,90];
 function daily(){const s=sget('nb-daily',{last:'',day:0}),t=today();if(s.last===t)return;
