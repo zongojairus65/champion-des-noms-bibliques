@@ -21,10 +21,10 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .ribbon:before,.ribbon:after{content:"";position:absolute;top:7px;width:11px;height:100%;background:linear-gradient(#b82a46,#8f1830)}
 .ribbon:before{left:-11px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,35% 50%)}
 .ribbon:after{right:-11px;clip-path:polygon(0 0,100% 0,65% 50%,100% 100%,0 100%)}
-#coins{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 4px;border-radius:24px;background:rgba(0,0,0,.28);box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
+#coins,#hcoins{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 4px;border-radius:24px;background:rgba(0,0,0,.28);box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
 .coin{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3a6,#f6b91f 55%,#c47d08);border:2px solid #fff0a0;color:#a15d00;font-weight:900;font-size:15px;box-shadow:0 2px 0 #8a5300}
-#coinn{font-weight:900;font-size:20px;min-width:44px;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.4)}
-#plus{width:34px;height:34px;border-radius:50%;border:2px solid #d6ffd0;color:#fff;font-size:26px;line-height:26px;font-weight:900;background:radial-gradient(circle at 35% 30%,#8df06f,#27a521);box-shadow:0 3px 0 #146b10}
+#coinn,#hcoinn{font-weight:900;font-size:20px;min-width:44px;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+#plus,#hplus{width:34px;height:34px;border-radius:50%;border:2px solid #d6ffd0;color:#fff;font-size:26px;line-height:26px;font-weight:900;background:radial-gradient(circle at 35% 30%,#8df06f,#27a521);box-shadow:0 3px 0 #146b10}
 #panel{position:relative;background:linear-gradient(#f8efd2,#efe2bd);border-radius:24px;padding:18px 14px 56px;min-height:190px;max-height:36vh;display:flex;align-items:center;justify-content:center;
  box-shadow:0 6px 0 #d8caa6,0 11px 0 rgba(0,0,0,.14),0 18px 22px rgba(0,0,0,.35)}
 #panel:before{content:"";position:absolute;inset:9px;border:3px dashed #d3a276;border-radius:17px;pointer-events:none}
@@ -58,7 +58,7 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 #shuf{left:14px}#hint{right:14px}
 .cost{display:inline-flex;align-items:center;gap:3px}
 .cost .coin{width:18px;height:18px;font-size:10px}
-#ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:20;padding:18px}
+#ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:70;padding:18px}
 .card{position:relative;width:100%;max-width:370px;padding:14px;border-radius:22px;background:linear-gradient(#e0a361,#a96a32);box-shadow:0 6px 0 #5d3414,0 16px 30px rgba(0,0,0,.5)}
 .paper{position:relative;padding:34px 12px 16px;border-radius:14px;background:linear-gradient(#f8efd2,#efe2bd);color:#7a3d12;text-align:center;box-shadow:inset 0 3px 8px rgba(0,0,0,.2)}
 .paper:before{content:"";position:absolute;inset:6px;border:2px dashed #d3a276;border-radius:10px;pointer-events:none}
@@ -76,7 +76,7 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
  background:linear-gradient(#59c6ff,#1678d8);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 5px 0 #0c4a92,0 9px 12px rgba(0,0,0,.35)}
 .big:active{transform:translateY(3px)}
 .msg{font-size:20px;font-weight:900;margin:8px 0 14px}
-#toast{position:fixed;left:50%;top:44%;transform:translateX(-50%);padding:9px 18px;border-radius:20px;background:rgba(40,25,10,.9);font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+#toast{position:fixed;left:50%;top:44%;transform:translateX(-50%);padding:9px 18px;border-radius:20px;background:rgba(40,25,10,.9);font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:80}
 #toast.on{opacity:1}
 .praise{position:fixed;left:50%;top:36%;font-size:46px;font-weight:900;white-space:nowrap;color:#ffd23f;-webkit-text-stroke:2px #b3541a;
  text-shadow:0 5px 0 #7a3a10,0 10px 14px rgba(0,0,0,.5);pointer-events:none;z-index:25;animation:pr 1.2s ease-out forwards}
@@ -136,7 +136,43 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 .info .src{font-weight:600;font-size:12px;opacity:.75}
 .info .lig b{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#1f7d85;margin-bottom:2px}
 .bw .word{gap:2px}.bw .cell{width:24px;height:24px;font-size:15px}
-</style></head><body>
+
+body.home #top,body.home #bottom{display:none}
+body:not(.home) #home{display:none}
+#home,#splash{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;
+ background:radial-gradient(ellipse 60% 22% at 50% 0%,rgba(255,255,225,.65),transparent 70%),
+  radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(0,45,50,.38) 100%),
+  linear-gradient(90deg,rgba(255,255,255,.2) 50%,transparent 50%),linear-gradient(rgba(255,255,255,.2) 50%,transparent 50%),#2a8f96;
+ background-size:auto,auto,118px 118px,118px 118px,auto}
+#home{z-index:40}
+#splash{z-index:60;transition:opacity .45s}#splash.out{opacity:0;pointer-events:none}
+.logo{position:relative;margin-top:21vh;text-align:center;font-family:"Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif;font-weight:900;line-height:1}
+.logo .o{text-shadow:-3px -3px 0 #6b1d10,3px -3px 0 #6b1d10,-3px 3px 0 #6b1d10,3px 3px 0 #6b1d10,0 6px 0 #4a1008,0 11px 12px rgba(0,0,0,.4)}
+.l1{font-size:clamp(34px,11.5vw,50px);color:#f7894a;letter-spacing:1px}
+.l2{font-size:clamp(20px,6.5vw,28px);color:#ffe6b0;margin:2px 0 4px}
+.l3{display:inline-block;font-size:clamp(34px,13vw,58px);color:#ffc933;padding:2px 22px 8px;background:#7a1c10;border-radius:26px;
+ outline:3px dashed rgba(255,225,190,.6);outline-offset:-8px;box-shadow:0 6px 0 #4a1008,0 12px 16px rgba(0,0,0,.4)}
+.spool{position:absolute;right:-6px;bottom:-14px;font-size:44px;transform:rotate(-12deg);filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+.charg{position:absolute;left:50%;bottom:21%;transform:translateX(-50%);white-space:nowrap;font-weight:900;font-size:clamp(34px,10.5vw,48px);color:#ef4b66;
+ font-family:"Trebuchet MS",system-ui,sans-serif;text-shadow:-3px -3px 0 #ffeacc,3px -3px 0 #ffeacc,-3px 3px 0 #ffeacc,3px 3px 0 #ffeacc,0 5px 0 #c9a97d,0 9px 10px rgba(0,0,0,.3)}
+.charg #dots{position:absolute;left:100%;bottom:0;text-align:left}
+#hcoins{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px}
+.btns{margin-top:auto;margin-bottom:19vh;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.pill{position:relative;display:flex;align-items:center;justify-content:center;gap:14px;width:min(78vw,340px);padding:0;border:5px solid transparent;border-radius:50px;color:#fff;font-weight:700;
+ background:linear-gradient(var(--g1),var(--g2)) padding-box,linear-gradient(#f0c07a,#9a5d2a) border-box;box-shadow:0 5px 0 #5d3414,0 11px 16px rgba(0,0,0,.35);text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.pill:active{transform:translateY(3px)}
+.pill.green{--g1:#7be662;--g2:#1f9a2c;height:76px;font-size:34px}
+.pill.blue{--g1:#59c6ff;--g2:#1678d8;height:62px;font-size:25px}
+.pill .ico{display:grid;place-items:center;font-size:28px}
+.pill.green .ico{font-size:34px;color:#eaffd8}
+.pill .dot{top:-6px;right:6px}
+.hrow{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 3vh);display:flex;justify-content:space-around;padding:0 10px}
+.hrow .it{position:relative;width:96px;text-align:center;font-size:13px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+.hrow .wood{position:relative;display:grid;place-items:center;width:66px;height:66px;margin:0 auto 4px;font-size:34px}
+.hrow .dot{top:-5px;right:-5px}
+.msgbox{background:#e3dfc8;border-radius:10px;padding:12px;margin:10px 4px;text-align:left;color:#7a3d12;font-weight:700;font-size:15px;line-height:1.35}
+.shopnote{font-size:16px;font-weight:800;color:#7a3d12;margin:8px 4px 14px;line-height:1.4}
+</style></head><body class="home">
 <div id="top">
  <div id="bar">
   <button id="gear" class="wood">⚙<i class="dot" id="gdot"></i></button>
@@ -153,6 +189,23 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
  <div class="side" id="dailyb"><button class="wood ic">📅<i class="dot" id="ddot"></i></button>Défi du jour</div>
  <div class="act" id="shuf"><button class="wood">🔄</button>Mélanger</div>
  <div class="act" id="hint"><button class="wood">💡</button>Indice <span class="cost"><span class="coin">$</span>60</span></div>
+</div>
+<div id="home">
+ <div id="hcoins"><span class="coin">$</span><span id="hcoinn">0</span><button id="hplus">+</button></div>
+ <div class="logo"><div class="l1 o">Champion</div><div class="l2 o">des noms</div><div class="l3 o">Bibliques</div><span class="spool">🧵</span></div>
+ <div class="btns">
+  <button class="pill green" id="play"><span class="ico">▶</span>Jouer</button>
+  <button class="pill blue" id="hdaily"><span class="ico">📅</span>Défi du jour<i class="dot" id="hddot"></i></button>
+ </div>
+ <div class="hrow">
+  <div class="it" id="hshop"><button class="wood">🛒</button>Boutique</div>
+  <div class="it" id="hmsg"><button class="wood">✉️<i class="dot" id="hmdot"></i></button>Message</div>
+  <div class="it" id="hset"><button class="wood">⚙</button>Paramètres</div>
+ </div>
+</div>
+<div id="splash">
+ <div class="logo"><div class="l1 o">Champion</div><div class="l2 o">des noms</div><div class="l3 o">Bibliques</div><span class="spool">🧵</span></div>
+ <div class="charg">Chargement<span id="dots">.</span></div>
 </div>
 <div id="ov"></div><div id="toast"></div>
 <script>
@@ -185,21 +238,26 @@ function praise(len,txt){let lo=len>=6?6:len>=4?3:0,hi=len>=6?10:len>=4?7:4,i=0;
  if(!txt){do{i=lo+Math.floor(Math.random()*(hi-lo))}while(i===lastPr&&hi-lo>1);lastPr=i;}
  const e=document.createElement('div');e.className='praise';e.textContent=txt||PR[i];document.body.appendChild(e);setTimeout(()=>e.remove(),1250);}
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1900);}
-function setCoins(v){coins=v;sset('nb-coins',v);$('coinn').textContent=v;}
+function setCoins(v){coins=v;sset('nb-coins',v);$('coinn').textContent=v;$('hcoinn').textContent=v;}
 function show(html,cls){$('ov').className=cls||'';$('ov').innerHTML=html;$('ov').style.display='flex';}
 function hide(){$('ov').style.display='none';$('ov').innerHTML='';}
 /* ---------- chargement ---------- */
 mute=sget('nb-mute',false);
+let loaded=false;const t0=Date.now();let dn=0;
+setInterval(()=>{dn=(dn+1)%4;$('dots').textContent='.'.repeat(dn+1);},350);
+function endSplash(){if(!loaded||Date.now()-t0<1800){setTimeout(endSplash,150);return;}
+ $('splash').classList.add('out');setTimeout(()=>{$('splash').style.display='none';},500);upd();setCoins(coins);daily();}
+setTimeout(endSplash,150);
 fetch('noms.json').then(r=>r.json()).then(o=>{NI=o;grid();}).catch(()=>{});
 fetch('levels.json').then(r=>r.json()).then(a=>{LV=a;coins=sget('nb-coins',300);setCoins(coins);
- n=Math.min(Math.max(1,sget('nb-lvl',1)),LV.length);dIdx=100+(Math.floor(Date.now()/864e5)*37)%600;load();daily();});
+ n=Math.min(Math.max(1,sget('nb-lvl',1)),LV.length);dIdx=100+(Math.floor(Date.now()/864e5)*37)%600;load();loaded=true;});
 function load(){const v=cur();L={l:[...v.l],w:v.w,b:v.b||[]};const t=tag();
  found=new Set(sget('nb-f-'+t,[]));bset=new Set(sget('nb-b-'+t,[]));H=sget('nb-h-'+t,{});done=false;
  starWord=(mode==='m'&&starLevel(Math.floor((n-1)/10))===n)?starWordOf(n):null;starFound=!!sget('nb-s-'+t,false);
  $('lvl').textContent=mode==='d'?'Défi du jour':'Niveau '+n;
- $('ddot').classList.toggle('on',sget('nb-dcd','')!==today());
+ upd();
  slots();grid();wheel();badge();check(true);
- if(mode==='m'&&n===5&&!sget('nb-ht',0)){sset('nb-ht',1);setTimeout(()=>howto(0),500);}}
+ if(mode==='m'&&n===5&&!sget('nb-ht',0)&&!document.body.classList.contains('home')){sset('nb-ht',1);setTimeout(()=>howto(0),500);}}
 function grid(pop){const t=L.w.reduce((a,w)=>a+w.length,0);
  setC(t<=12?46:t<=24?38:t<=40?31:27);
  $('grid').innerHTML=L.w.map(w=>'<div class="word">'+[...w].map((c,i)=>{
@@ -273,7 +331,7 @@ $('bonusb').onclick=()=>{const c=sget('nb-bc',0),pc=Math.min(100,c/MED[2]*100);
 $('dailyb').onclick=()=>{if(sget('nb-dcd','')===today())return toast('Défi du jour déjà terminé. Reviens demain !');
  mode='d';hide();load();toast('Défi du jour : +50 pièces à la clé');};
 /* ---------- victoire ---------- */
-function check(silent){if(!L||found.size!==L.w.length||done)return;done=true;const t=tag(),first=!sget('nb-w-'+t,false);let gain=0;
+function check(silent){if(!L||found.size!==L.w.length||done)return;if(silent&&document.body.classList.contains('home'))return;done=true;const t=tag(),first=!sget('nb-w-'+t,false);let gain=0;
  if(first){gain=mode==='d'?50:10;sset('nb-w-'+t,true);setCoins(coins+gain);if(mode==='d')sset('nb-dcd',today());$('ddot').classList.remove('on');if(!silent){sfx.win();praise(9,'Génial !');}}
  setTimeout(()=>show('<div class="burst"></div><div class="done"><div class="ribbon">'+(mode==='d'?'DÉFI RÉUSSI !':'NIVEAU TERMINÉ !')+'</div>'+(gain?'<div class="msg">+'+gain+' <span class="coin" style="vertical-align:middle">$</span></div>':'')+'<button class="big green" id="nx">'+(mode==='d'?'Continuer':'Niveau suivant')+'</button></div>','win'),silent?100:600);}
 /* ---------- fiche d'un nom ---------- */
@@ -296,11 +354,29 @@ document.addEventListener('click',e=>{const id=e.target.id;
  if(id==='hn')howto(1);if(id==='hp')howto(0);
  if(id==='ht')howto(0);
  if(id==='bk'){hide();mode='m';load();}
+ if(id==='hm'){hide();goHome();}
+ if(id==='wl'){setCoins(coins+100);sset('nb-welcome',true);sfx.coin();hide();upd();toast('+100 pièces');}
  if(id==='rs'&&confirm('Tout recommencer ?')){try{localStorage.clear()}catch(x){}location.reload();}
  if(id==='sn'){mute=!mute;sset('nb-mute',mute);e.target.textContent=mute?'🔇 Son : coupé':'🔊 Son : activé';if(!mute)sfx.coin();}});
-$('gear').onclick=()=>show('<div class="card"><div class="ribbon">Réglages</div><button class="wood x" id="cl">✕</button><div class="paper stack"><div class="msg" style="font-size:16px">'+(mode==='d'?'Défi du jour':'Niveau '+n+' / '+LV.length)+'</div>'
+function upd(){const nd=sget('nb-dcd','')!==today();$('ddot').classList.toggle('on',nd);$('hddot').classList.toggle('on',nd);$('hmdot').classList.toggle('on',!sget('nb-welcome',false));}
+function settings(){const g=!document.body.classList.contains('home');
+ show('<div class="card"><div class="ribbon">'+(g?'Réglages':'Paramètres')+'</div><button class="wood x" id="cl">✕</button><div class="paper stack">'
+ +(g?'<div class="msg" style="font-size:16px">'+(mode==='d'?'Défi du jour':'Niveau '+n+' / '+LV.length)+'</div>':'')
  +'<button class="big" id="sn">'+(mute?'🔇 Son : coupé':'🔊 Son : activé')+'</button><button class="big" id="ht">❓ Comment jouer</button>'
- +(mode==='d'?'<button class="big green" id="bk">Retour au niveau '+n+'</button>':'')+'<button class="big red" id="rs">Recommencer</button><div class="credit">Sens et nature des noms : données STEPBible.org (Tyndale House), licence CC BY 4.0, traduites en français.</div></div></div>');
+ +(g?'<button class="big" id="hm">🏠 Menu principal</button>':'')
+ +(g&&mode==='d'?'<button class="big green" id="bk">Retour au niveau '+n+'</button>':'')
+ +'<button class="big red" id="rs">Recommencer</button><div class="credit">Sens et nature des noms : données STEPBible.org (Tyndale House), licence CC BY 4.0, traduites en français.</div></div></div>');}
+$('gear').onclick=settings;$('hset').onclick=settings;
+function goHome(){document.body.classList.add('home');upd();setCoins(coins);}
+function goGame(m){mode=m;document.body.classList.remove('home');load();}
+$('play').onclick=()=>{ac();goGame('m');};
+$('hdaily').onclick=()=>{ac();if(sget('nb-dcd','')===today())return toast('Défi du jour déjà terminé. Reviens demain !');goGame('d');toast('Défi du jour : +50 pièces à la clé');};
+$('hplus').onclick=()=>show('<div class="card"><div class="ribbon">Boutique</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="shopnote">Gagne des pièces en réussissant les niveaux, en trouvant les mots bonus et le mot étoilé, et avec le bonus quotidien.</div></div></div>');
+$('hshop').onclick=()=>show('<div class="card"><div class="ribbon">Boutique</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="msg">🛒</div><div class="shopnote">La boutique arrive bientôt.<br>En attendant, gagne des pièces en jouant : tu en as '+coins+'.</div></div></div>');
+$('hmsg').onclick=()=>{const w=sget('nb-welcome',false);
+ show('<div class="card"><div class="ribbon">Messages</div><button class="wood x" id="cl">✕</button><div class="paper">'
+ +(w?'<div class="shopnote">Aucun nouveau message.</div>':'<div class="msgbox">🎁 <b>Bienvenue, Champion !</b><br>Voici 100 pièces pour bien commencer ta partie.</div><button class="big" id="wl">Collecter</button>')
+ +'</div></div>');};
 /* ---------- bonus quotidien ---------- */
 const RW=[25,35,45,55,65,75,90];
 function daily(){const s=sget('nb-daily',{last:'',day:0}),t=today();if(s.last===t)return;

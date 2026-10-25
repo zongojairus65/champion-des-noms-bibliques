@@ -1,7 +1,7 @@
 # Champion des noms bibliques
 
 Jeu de mots à roue de lettres : trouver les noms bibliques cachés. 1000 niveaux, 1500 noms, fonctionne hors ligne.
-Mots bonus (kit de couture : ils partent directement dans le panier), mot étoilé (une case par lettre, un niveau au hasard par dizaine, rapporte 50 pièces), défi du jour, bonus quotidien, indices, effets sonores.
+Écran de chargement et menu principal (Jouer, Défi du jour, Boutique, Message, Paramètres), mots bonus (kit de couture : ils partent directement dans le panier), mot étoilé (une case par lettre, un niveau au hasard par dizaine, rapporte 50 pièces), défi du jour, bonus quotidien, indices, effets sonores.
 
 - `site/` : le jeu (HTML/JS) et `levels.json` (niveaux pré-générés)
 - `mots.json` : les noms (personnes et lieux), du plus connu au moins connu
