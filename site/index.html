@@ -93,7 +93,11 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 #slots{position:absolute;left:0;right:0;bottom:20px;display:flex;justify-content:center;gap:7px}
 .slot{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:19px;
  background:repeating-linear-gradient(45deg,#cbbba9 0 4px,#bba99a 4px 8px);box-shadow:inset 0 2px 4px rgba(0,0,0,.25)}
-.slot.on{background:linear-gradient(#fffdf6,#f3e6c8);outline:2px solid #9a5a2b;outline-offset:-1px;box-shadow:0 3px 0 #8a5226}
+.slot.on{background:linear-gradient(#fffdf6,#f3e6c8);outline:2px solid #9a5a2b;outline-offset:-1px;box-shadow:0 3px 0 #8a5226;color:var(--o2);font-weight:900}
+.slot.st{font-size:17px}
+#panel.nostar{padding-bottom:18px}
+.fly{position:fixed;z-index:40;padding:5px 14px;border-radius:12px;font-weight:900;font-size:22px;letter-spacing:2px;color:var(--o2);background:linear-gradient(#fffdf6,#f3e6c8);border:3px solid #fff;outline:2px solid #9a5a2b;outline-offset:-1px;box-shadow:0 4px 0 #8a5226;pointer-events:none}
+.coinfx{position:fixed;z-index:40;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff3a6,#f6b91f 55%,#c47d08);border:2px solid #fff0a0;color:#a15d00;font-weight:900;font-size:14px;pointer-events:none}
 #cur.ok{background:linear-gradient(#58d963,#1f9a2c);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 3px 0 #135f1b,0 6px 8px rgba(0,0,0,.4)}
 #ov.win{background:rgba(0,0,0,.62)}
 .burst{position:absolute;left:50%;top:50%;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;
@@ -152,6 +156,7 @@ body{display:flex;flex-direction:column;overflow:hidden;font-family:"Trebuchet M
 </div>
 <div id="ov"></div><div id="toast"></div>
 <script>
+let starWord=null,starFound=false;
 let LV=[],NI={},n=1,mode='m',dIdx=0,L,found=new Set(),bset=new Set(),H={},coins=300,path=[],drag=false,done=false,mute=false;
 const $=id=>document.getElementById(id);
 const sget=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
@@ -190,9 +195,10 @@ fetch('levels.json').then(r=>r.json()).then(a=>{LV=a;coins=sget('nb-coins',300);
  n=Math.min(Math.max(1,sget('nb-lvl',1)),LV.length);dIdx=100+(Math.floor(Date.now()/864e5)*37)%600;load();daily();});
 function load(){const v=cur();L={l:[...v.l],w:v.w,b:v.b||[]};const t=tag();
  found=new Set(sget('nb-f-'+t,[]));bset=new Set(sget('nb-b-'+t,[]));H=sget('nb-h-'+t,{});done=false;
+ starWord=(mode==='m'&&starLevel(Math.floor((n-1)/10))===n)?starWordOf(n):null;starFound=!!sget('nb-s-'+t,false);
  $('lvl').textContent=mode==='d'?'Défi du jour':'Niveau '+n;
  $('ddot').classList.toggle('on',sget('nb-dcd','')!==today());
- grid();slots();wheel();badge();check(true);
+ slots();grid();wheel();badge();check(true);
  if(mode==='m'&&n===5&&!sget('nb-ht',0)){sset('nb-ht',1);setTimeout(()=>howto(0),500);}}
 function grid(pop){const t=L.w.reduce((a,w)=>a+w.length,0);
  setC(t<=12?46:t<=24?38:t<=40?31:27);
@@ -201,9 +207,15 @@ function grid(pop){const t=L.w.reduce((a,w)=>a+w.length,0);
   return '<div class="cell'+(f?' on':h?' hint':'')+(pop===w?' pop':'')+'">'+(f||h?c:'')+'</div>';}).join('')+(found.has(w)?'<button class="inf" data-w="'+w+'">i</button>':'')+'</div>').join('');fit();}
 function setC(c){const g=$('grid');g.style.setProperty('--c',c+'px');g.style.setProperty('--ib',Math.max(18,Math.round(c*.62))+'px');}
 function fit(){const g=$('grid');let c=parseInt(g.style.getPropertyValue('--c'))||40;
- const avail=Math.max(80,innerHeight*.36-74);
+ const cs=getComputedStyle($('panel'));const avail=Math.max(80,innerHeight*.36-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-4);
  while(g.offsetHeight>avail&&c>16){c-=2;setC(c);}}
-function slots(){$('slots').innerHTML=[0,1,2].map(i=>'<div class="slot'+(i<bset.size?' on':'')+'">'+(i<bset.size?'⭐':'')+'</div>').join('');}
+function starLevel(dec){const r=(Math.imul(dec+7,2654435761)>>>0)%10;
+ for(let k=0;k<10;k++){const i=dec*10+((r+k)%10)+1;if(i<3||i>LV.length)continue;if(LV[i-1].b.length)return i;}return 0;}
+function starWordOf(i){return LV[i-1].b.slice().sort((x,y)=>y.length-x.length||x.localeCompare(y))[0];}
+function slots(){const s=$('slots'),pn=$('panel');
+ if(!starWord){pn.classList.add('nostar');s.innerHTML='';return;}
+ pn.classList.remove('nostar');
+ s.innerHTML=[...starWord].map((c,i)=>starFound?'<div class="slot on">'+c+'</div>':'<div class="slot st">'+(i===0?'⭐':'')+'</div>').join('');}
 const MED=[5,12,20],MR=[20,40,80];
 function badge(){$('bcnt').textContent=sget('nb-bc',0);}
 /* ---------- roue ---------- */
@@ -230,11 +242,24 @@ window.addEventListener('pointerup',()=>{if(!drag)return;drag=false;const w=path
  else if(L.b.includes(w)&&!bset.has(w))bonusFound(w);
  else if(w.length>1){sfx.bad();if(found.has(w)||bset.has(w))toast('Vous avez déjà trouvé ce mot');$('wheel').classList.add('shake');setTimeout(()=>$('wheel').classList.remove('shake'),300);}
  path=[];draw(null);$('cur').style.visibility='hidden';});
-function bonusFound(w){bset.add(w);sset('nb-b-'+tag(),[...bset]);sfx.bonus();praise(0,'Mot bonus !');slots();
- let c=sget('nb-bc',0)+1,gain=0;const i=MED.indexOf(c);if(i>=0){gain=MR[i];}
- if(bset.size===3)gain+=30;
- if(c>=MED[2])c=0;sset('nb-bc',c);badge();$('bonusb').firstChild.classList.add('pulse');setTimeout(()=>$('bonusb').firstChild.classList.remove('pulse'),500);
- if(gain){setCoins(coins+gain);setTimeout(()=>{sfx.coin();toast('Récompense bonus : +'+gain+' pièces');},700);}}
+function fly(w){const a=$('cur').getBoundingClientRect(),b=$('bonusb').getBoundingClientRect(),e=document.createElement('div');
+ const x0=a.left+a.width/2,y0=a.top+a.height/2,dx=b.left+b.width/2-x0,dy=b.top+b.height/2-y0;
+ e.className='fly';e.textContent=w;e.style.left=x0+'px';e.style.top=y0+'px';document.body.appendChild(e);
+ e.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},
+  {transform:'translate(calc(-50% + '+dx*.5+'px),calc(-50% + '+(dy*.5-70)+'px)) scale(1.15)',opacity:1,offset:.4},
+  {transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px)) scale(.25)',opacity:.3}],{duration:800,easing:'ease-in'})
+ .onfinish=()=>{e.remove();const k=$('bonusb').firstChild;k.classList.add('pulse');setTimeout(()=>k.classList.remove('pulse'),500);};}
+function coinBurst(){const r=$('slots').getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+ for(let i=0;i<12;i++){const e=document.createElement('div');e.className='coinfx';e.textContent='$';e.style.left=x+'px';e.style.top=y+'px';document.body.appendChild(e);
+  const a=Math.PI*2*i/12,d=70+Math.random()*60,cx=Math.cos(a)*d,cy=Math.sin(a)*d;
+  e.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:1},
+   {transform:'translate(calc(-50% + '+cx+'px),calc(-50% + '+(cy-40)+'px)) scale(1)',opacity:1,offset:.6},
+   {transform:'translate(calc(-50% + '+cx+'px),calc(-50% + '+(cy+60)+'px)) scale(.8)',opacity:0}],{duration:1000,easing:'ease-out'}).onfinish=()=>e.remove();}}
+function bonusFound(w){bset.add(w);sset('nb-b-'+tag(),[...bset]);sfx.bonus();fly(w);
+ let c=sget('nb-bc',0)+1,gain=0;const i=MED.indexOf(c);if(i>=0)gain=MR[i];
+ if(c>=MED[2])c=0;sset('nb-bc',c);badge();
+ if(w===starWord&&!starFound){starFound=true;sset('nb-s-'+tag(),true);slots();coinBurst();gain+=50;setTimeout(()=>{sfx.win();praise(9,'Mot étoilé !');},450);}
+ if(gain){setCoins(coins+gain);setTimeout(()=>{sfx.coin();toast('Récompense : +'+gain+' pièces');},900);}}
 /* ---------- boutons ---------- */
 $('shuf').onclick=()=>{L.l.sort(()=>Math.random()-.5);wheel();};
 $('hint').onclick=()=>{if(done)return;if(coins<60)return toast('Pas assez de pièces');
@@ -242,8 +267,9 @@ $('hint').onclick=()=>{if(done)return;if(coins<60)return toast('Pas assez de pi�
  const w=c[Math.floor(Math.random()*c.length)];H[w]=(H[w]||0)+1;sset('nb-h-'+tag(),H);setCoins(coins-60);sfx.coin();grid();};
 $('plus').onclick=()=>toast('Gagne des pièces en réussissant les niveaux');
 $('bonusb').onclick=()=>{const c=sget('nb-bc',0),pc=Math.min(100,c/MED[2]*100);
+ const starRow=(starWord&&!starFound)?'<div class="word" style="width:100%;justify-content:center">'+[...starWord].map(()=>'<div class="cell on" style="background:#27407d;border-color:#27407d;outline-color:#fff">⭐</div>').join('')+'</div>':'';
  const tiles=[...bset].map(w=>'<div class="word">'+[...w].map(x=>'<div class="cell on">'+x+'</div>').join('')+'<button class="inf" data-w="'+w+'">i</button></div>').join('')||'<p style="text-align:center">Aucun mot bonus trouvé dans ce niveau.</p>';
- show('<div class="card"><div class="ribbon">Mots Bonus</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="bar"><div class="fill" style="width:'+pc+'%"></div><b style="left:25%">🥉</b><b style="left:60%">🥈</b><b style="left:96%">🥇</b></div><div class="msg" style="font-size:15px;margin:4px 0">'+c+' / '+MED[2]+'</div><div class="bw">'+tiles+'</div><p style="text-align:center">Trouve des noms qui ne sont pas dans les réponses pour gagner des pièces !</p></div></div>');};
+ show('<div class="card"><div class="ribbon">Mots Bonus</div><button class="wood x" id="cl">✕</button><div class="paper"><div class="bar"><div class="fill" style="width:'+pc+'%"></div><b style="left:25%">🥉</b><b style="left:60%">🥈</b><b style="left:96%">🥇</b></div><div class="msg" style="font-size:15px;margin:4px 0">'+c+' / '+MED[2]+'</div><div class="bw">'+starRow+tiles+'</div><p style="text-align:center">Trouve des noms qui ne sont pas dans les réponses pour gagner des pièces !</p></div></div>');};
 $('dailyb').onclick=()=>{if(sget('nb-dcd','')===today())return toast('Défi du jour déjà terminé. Reviens demain !');
  mode='d';hide();load();toast('Défi du jour : +50 pièces à la clé');};
 /* ---------- victoire ---------- */
