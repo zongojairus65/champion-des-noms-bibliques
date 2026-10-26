@@ -18,3 +18,10 @@ Ajouter des noms : éditer `mots.json`, lancer `node scripts/generate-levels.js`
 - Texte biblique français utilisé pour extraire les noms et les versets : jeu de données `thiagobodruk/bible` (fr_apee).
 - Sens et nature (personne, lieu, divinité) des noms : STEPBible-Data, Tyndale House Cambridge (TIPNR et TBESH), licence CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/), traduits en français ; les sens vérifiés à la main sont dans `data/sens.json` et passent en priorité.
 - Le texte de la Bible n'est pas embarqué dans le jeu : seules les références de versets le sont.
+
+## APK signée (pour la vente)
+1. Une seule fois : `bash scripts/creer-cle.sh` (crée la clé `~/champion-cle.jks` et l'envoie dans les secrets GitHub). Sauvegarde la clé et son mot de passe dans un endroit privé : sans elle, plus de mise à jour possible.
+2. À chaque version : `gh workflow run apk.yml`. L'APK signée est publiée dans Releases > latest. Le numéro de version augmente automatiquement, donc une nouvelle version s'installe par-dessus l'ancienne sans effacer la progression.
+
+## Icône et écran de démarrage
+`resources/icon.png` (1024 x 1024) est la source unique. `scripts/make-android-assets.py` en tire, à chaque construction de l'APK, les icônes classique, ronde et adaptative d'Android et l'écran de démarrage. Pour changer l'icône, remplace ce fichier puis relance `gh workflow run apk.yml`.

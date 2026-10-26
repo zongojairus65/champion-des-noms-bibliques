@@ -17,6 +17,10 @@ fi
 gh api -X POST "repos/$USER/$REPO/pages" -f build_type=workflow >/dev/null 2>&1 || true
 sleep 3
 gh workflow run deploy.yml
-gh workflow run apk.yml
+if gh secret list | grep -q '^KEYSTORE_B64'; then
+  gh workflow run apk.yml
+else
+  echo "APK non lancée : crée d'abord la clé de signature avec  bash scripts/creer-cle.sh  puis lance  gh workflow run apk.yml"
+fi
 echo "Site : https://$USER.github.io/$REPO/"
-echo "APK  : https://github.com/$USER/$REPO/releases/tag/latest (dans 6 à 8 min)"
+echo "APK  : https://github.com/$USER/$REPO/releases/tag/latest (6 à 8 min après la construction)"
